@@ -8,7 +8,7 @@ function pIpc (id,config) {
     this.config = config;
     this._ipc = ipc;
     Object.keys(config).forEach( key => this._ipc.config[key] = config[key] );
-    this._ipc.id = id;
+    this._ipc.config.id = id;
     this._resolvers = {};
 };
 
@@ -26,6 +26,7 @@ pIpc.prototype.start = function start () {
             if ( !resolvers ) return;
             if ( msg.error ) resolvers.reject(msg.error)
             else resolvers.resolve(msg.data);
+            delete this._resolvers[msg.rid];
         });
         this._ipc.server.start();
     });
@@ -49,10 +50,20 @@ pIpc.prototype.stop = function stop () {
 
 pIpc.prototype._connect = function _connect (id) {
     return new Promise( (resolve,reject) => {
-        this._ipc.connectTo( id, () => {
-            this._ipc.of[id].on('error',reject);
-            this._ipc.of[id].on('connect',resolve);
-        });
+        try {
+            if ( !this._ipc.of[id] ) {
+                this._ipc.connectTo( id, () => {
+                    this._ipc.of[id].on('error',reject);
+                    this._ipc.of[id].on('connect',resolve);
+                });
+            }
+            else {
+                resolve();
+            }
+        }
+        catch (err) {
+            reject(err);
+        }
     });
 };
 
@@ -60,15 +71,20 @@ pIpc.prototype._connect = function _connect (id) {
 * @function request - send a message and wait for a reply
 * @param {String} id - the ID of the remote IPC server
 * @param {String} channel - the name of the event on the remove IPC server
-* @param {Object} data - the data to send to the remove event
+* ... remaining parameters are sent as the request content
 * @returns {Promise} - resolves the response data
 */
-pIpc.prototype.request = function request (id,channel,data) {
+pIpc.prototype.request = function request (id,channel,...content) {
     return new Promise( async (resolve,reject) => {
         let rid = uniqid();
-        await this._connect(id);
-        this._resolvers[rid] = { 'resolve': resolve, 'reject': reject };
-        this._ipc.of[id].emit(channel,{ sender: this.id, rid: rid, data: data });
+        try {
+            await this._connect(id);
+            this._resolvers[rid] = { 'resolve': resolve, 'reject': reject };
+            this._ipc.of[id].emit(channel,{ sender: this.id, rid: rid, content: content });
+        }
+        catch (err) {
+            reject(err);
+        }
     });
 };
 
@@ -79,10 +95,15 @@ pIpc.prototype.request = function request (id,channel,data) {
 * @param {Object} data - the data to send to the remove event
 * @returns {Promise} - resolves after the message has been sent
 */
-pIpc.prototype.send = function send (id,rid,channel,data) {
+pIpc.prototype.send = function send (id,rid,channel,response) {
     return new Promise( async (resolve,reject) => {
-        await this._connect(id);
-        this._ipc.of[id].emit(channel,{ sender: this.id, rid: rid, data: data });
+        try {
+            await this._connect(id);
+            this._ipc.of[id].emit(channel,Object.assign({ sender: this.id, rid: rid },response));
+        }
+        catch (err) {
+            reject(err);
+        }
     });
 };
 
@@ -93,8 +114,13 @@ pIpc.prototype.send = function send (id,rid,channel,data) {
 */
 pIpc.prototype.on = function on (channel,callback) {
     this._ipc.server.on(channel, async (request) => {
-        let data = await callback(request.data);
-        await this.send(request.sender,request.rid,'response',data);
+        try {
+            let data = await callback(...(request.content));
+            await this.send(request.sender,request.rid,'response',{ data: data });
+        }
+        catch (err) {
+            await this.send(request.sender,request.rid,'response',{ error: err });
+        }
     });
 };
 
