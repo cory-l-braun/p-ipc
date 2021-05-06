@@ -2,6 +2,7 @@
 
 const ipc = require('node-ipc');
 const uniqid = require('uniqid');
+const EJSON = require('bson').EJSON;
 
 function pIpc (id,config) {
     this.id = id;
@@ -21,7 +22,8 @@ pIpc.prototype.start = function start () {
         this._ipc.serve();
         this._ipc.server.on('start',resolve);
         this._ipc.server.on('error',reject);
-        this._ipc.server.on('response', (msg) => {
+        this._ipc.server.on('response', (_msg) => {
+            let msg = EJSON.parse(_msg);
             let resolvers = this._resolvers[msg.rid];
             if ( !resolvers ) return;
             if ( msg.error ) resolvers.reject(msg.error)
@@ -80,7 +82,7 @@ pIpc.prototype.request = function request (id,channel,...content) {
         try {
             await this._connect(id);
             this._resolvers[rid] = { 'resolve': resolve, 'reject': reject };
-            this._ipc.of[id].emit(channel,{ sender: this.id, rid: rid, content: content });
+            this._ipc.of[id].emit(channel,EJSON.stringify({ sender: this.id, rid: rid, content: content },{ relaxed: false }));
         }
         catch (err) {
             reject(err);
@@ -99,7 +101,8 @@ pIpc.prototype.send = function send (id,rid,channel,response) {
     return new Promise( async (resolve,reject) => {
         try {
             await this._connect(id);
-            this._ipc.of[id].emit(channel,Object.assign({ sender: this.id, rid: rid },response));
+            this._ipc.of[id].emit(channel,EJSON.stringify(Object.assign({ sender: this.id, rid: rid },response),{ relaxed: false }));
+            resolve();
         }
         catch (err) {
             reject(err);
@@ -113,7 +116,8 @@ pIpc.prototype.send = function send (id,rid,channel,response) {
 * @param {Function} callback - receives request data; should return response data
 */
 pIpc.prototype.on = function on (channel,callback) {
-    this._ipc.server.on(channel, async (request) => {
+    this._ipc.server.on(channel, async (_request) => {
+        let request = EJSON.parse(_request);
         try {
             let data = await callback(...(request.content));
             await this.send(request.sender,request.rid,'response',{ data: data });
