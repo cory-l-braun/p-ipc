@@ -10,6 +10,7 @@ function pIpc (id,config) {
     Object.keys(config).forEach( key => this._ipc.config[key] = config[key] );
     this._ipc.config.id = id;
     this._resolvers = {};
+    this._callbacks = {};
 };
 
 /*
@@ -111,27 +112,40 @@ pIpc.prototype.send = function send (id,rid,channel,response) {
 * @function on - register an event listener on this IPC server
 * @param {String} channel - the name of the event on this IPC server
 * @param {Function} callback - receives request data; should return response data
+* @param {!Object} context - if defined the callback is invoked with this context
 */
-pIpc.prototype.on = function on (channel,callback) {
-    this._ipc.server.on(channel, async (request) => {
+pIpc.prototype.on = function on (channel,callback,context) {
+    let fnc = async (request) => {
         try {
-            let data = await callback(...(request.content));
+            let data = context ? await callback.call(context,...this(request.content)) : await callback(...(request.content));
             await this.send(request.sender,request.rid,'response',{ data: data });
         }
         catch (err) {
             await this.send(request.sender,request.rid,'response',{ error: err });
         }
-    });
+    };
+    if ( !this._callbacks[channel] ) this._callbacks[channel] = [];
+    this._callbacks[channel].push([callback,fnc]);
+    this._ipc.server.on(channel,fnc);
 };
 
 /*
 * @function off - deregister an event listener on this IPC server
-* @WIP
 * @param {String} channel - the name of the event on this IPC server
 * @param {Function} callback - receives request data; should return response data
 */
 pIpc.prototype.off = function off (channel,callback) {
-    
+    let callbacks = this._callbacks[channel] || [];
+    let fnc;
+    for ( let i=0; i<callbacks.length; i++ ) {
+        let _fnc = callbacks[i];
+        if ( _fnc[0] === callback ) {
+            fnc = _fnc;
+            this._callbacks.splice( i, 1 );
+            break;   
+        }
+    }
+    if ( fnc ) this._ipc.server.off(channel,fnc[1]);
 };
 
 module.exports = pIpc;
