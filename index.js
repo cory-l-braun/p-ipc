@@ -161,7 +161,7 @@ pIpc.prototype.on = function on (channel,fnc,context) {
             await this.reply(request.sender,request.rid,'response',{ data: data });
         }
         catch (err) {
-            await this.reply(request.sender,request.rid,'response',{ error: !err ? null : JSON.stringify(err,Object.getOwnPropertyNames(err)) });
+            await this.reply(request.sender,request.rid,'response',{ error: !err ? null : JSON.parse(JSON.stringify(err,Object.getOwnPropertyNames(err))) });
         }
     };
     if ( !this._events[channel] ) this._events[channel] = [];
