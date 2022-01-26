@@ -3,6 +3,7 @@
 const ipc = require('node-ipc');
 const uniqid = require('uniqid');
 const EJSON = require('bson').EJSON;
+const { serializeError, deserializeError } = require('./lib/serialize-error.js');
 
 function pIpc (id,config) {
     this.id = id;
@@ -27,7 +28,7 @@ pIpc.prototype.start = function start () {
             let msg = EJSON.parse(_msg);
             let resolvers = this._resolvers[msg.rid];
             if ( !resolvers ) return;
-            if ( msg.error ) resolvers.reject(msg.error)
+            if ( msg.error ) resolvers.reject( deserializeError(msg.error) )
             else resolvers.resolve(msg.data);
             delete this._resolvers[msg.rid];
         });
@@ -161,7 +162,8 @@ pIpc.prototype.on = function on (channel,fnc,context) {
             await this.reply(request.sender,request.rid,'response',{ data: data });
         }
         catch (err) {
-            await this.reply(request.sender,request.rid,'response',{ error: !err ? null : JSON.parse(JSON.stringify(err,Object.getOwnPropertyNames(err))) });
+            // await this.reply(request.sender,request.rid,'response',{ error: !err ? null : JSON.parse(JSON.stringify(err,Object.getOwnPropertyNames(err))) });
+            await this.reply(request.sender,request.rid,'response',{ error: serializeError(err) });
         }
     };
     if ( !this._events[channel] ) this._events[channel] = [];
