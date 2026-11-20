@@ -1,10 +1,12 @@
 {
   "name": "p-ipc",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "Promise based IPC",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --exit"
+    "build": "node esbuild.config.js",
+    "test": "mocha --exit",
+    "test:dist": "node -e \"const pkg = require('./package.json'); const fs = require('fs'); pkg.main = 'dist/p-ipc.js'; fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2)); require('child_process').spawnSync('npx', ['mocha', '--exit'], {stdio: 'inherit'}); pkg.main = 'index.js'; fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2));\""
   },
   "repository": {
     "type": "git",
@@ -22,6 +24,8 @@
     "uniqid": "^5.2.0"
   },
   "devDependencies": {
-    "mocha": "^10.2.0"
+    "esbuild": "^0.28.2",
+    "mocha": "^10.2.0",
+    "terser": "^5.51.3"
   }
 }
