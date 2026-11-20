@@ -1,28 +1,27 @@
 {
   "name": "p-ipc",
-  "version": "2.1.3",
-  "description": "Promise based node-ipc",
+  "version": "2.1.4",
+  "description": "Promise based IPC",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha --exit"
   },
   "repository": {
     "type": "git",
-    "url": "git@gitlab.unitedsoilsinc.com:javascript/p-ipc.git"
+    "url": "https://github.com/cory-l-braun/p-ipc"
   },
   "keywords": [
     "promise",
     "ipc"
   ],
-  "author": "Cory Braun <braunc@unitedsoilsinc.com>",
+  "author": "Cory Braun <cory.l.braun@gmail.com>",
   "license": "ISC",
   "dependencies": {
     "bson": "^4.3.0",
     "node-ipc": "^9.1.3",
-    "typescript-require": "^0.3.0",
     "uniqid": "^5.2.0"
   },
   "devDependencies": {
-    "mocha": "^8.2.1"
+    "mocha": "^10.2.0"
   }
 }
