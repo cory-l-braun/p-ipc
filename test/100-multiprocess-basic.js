@@ -1,7 +1,7 @@
 const assert = require('assert');
 const path = require('path');
 const { spawn } = require('child_process');
-const pIpc = require('../index.js');
+const pIpc = require('../');
 const { createServerScript, indexPath, cleanup, getAppConfig, spawnServer } = require('./multiprocess-helpers');
 
 describe('p-ipc Multiprocess - Basic Communication', function () {

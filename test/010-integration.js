@@ -1,5 +1,5 @@
 const assert = require('assert');
-const pIpc = require('../index.js');
+const pIpc = require('../');
 
 /**
  * Integration test suite for p-ipc

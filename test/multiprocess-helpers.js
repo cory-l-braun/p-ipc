@@ -4,7 +4,7 @@ const fs = require('fs');
 const os = require('os');
 
 const projectRoot = path.resolve(__dirname, '..');
-const indexPath = path.join(projectRoot, 'index.js');
+const indexPath = path.join(projectRoot, 'dist', 'p-ipc.js');
 
 function uniqueAppId(descriptor) {
     // Returns a unique identifier for socket naming

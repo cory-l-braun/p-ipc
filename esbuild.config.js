@@ -1,7 +1,7 @@
 const esbuild = require('esbuild');
 
 const buildOptions = {
-  entryPoints: ['index.js'],
+  entryPoints: ['index.ts'],
   bundle: true,
   platform: 'node',
   target: 'node14',

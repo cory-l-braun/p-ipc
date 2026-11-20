@@ -2,7 +2,7 @@ const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
-const pIpc = require('../index.js');
+const pIpc = require('../');
 const { getTempDir, spawnServerWithCapture, createServerScript, indexPath, cleanup, getAppConfig, waitForServerReady } = require('./multiprocess-helpers');
 
 describe('p-ipc Multiprocess - Server Error Handling', function () {

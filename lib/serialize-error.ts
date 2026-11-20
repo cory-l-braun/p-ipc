@@ -1,6 +1,5 @@
 // originally from https://github.com/sindresorhus/serialize-error
 
-(() => {
 const commonProperties = [
 	{
 		property: 'name',
@@ -22,12 +21,21 @@ const commonProperties = [
 
 const toJsonWasCalled = Symbol('.toJSON was called');
 
-const toJSON = from => {
+const toJSON = (from: any) => {
 	from[toJsonWasCalled] = true;
 	const json = from.toJSON();
 	delete from[toJsonWasCalled];
 	return json;
 };
+
+interface DestroyCircularOptions {
+	from: any;
+	seen: any[];
+	to_?: any;
+	forceEnumerable?: boolean;
+	maxDepth: number;
+	depth: number;
+}
 
 const destroyCircular = ({
 	from,
@@ -36,7 +44,7 @@ const destroyCircular = ({
 	forceEnumerable,
 	maxDepth,
 	depth,
-}) => {
+}: DestroyCircularOptions): any => {
     const to = to_ || (Array.isArray(from) ? [] : {});
 
     seen.push(from);
@@ -50,7 +58,6 @@ const destroyCircular = ({
     }
 
     for (const [key, value] of Object.entries(from)) {
-        // eslint-disable-next-line node/prefer-global/buffer
         if (typeof Buffer === 'function' && Buffer.isBuffer(value)) {
             to[key] = '[object Buffer]';
             continue;
@@ -95,8 +102,7 @@ const destroyCircular = ({
     return to;
 };
 
-module.exports.serializeError = function serialize (value,options) {
-    
+export function serializeError(value: any, options?: {maxDepth?: number}): any {
 	const {maxDepth = Number.POSITIVE_INFINITY} = (options || {});
 
 	if (typeof value === 'object' && value !== null) {
@@ -109,17 +115,14 @@ module.exports.serializeError = function serialize (value,options) {
 		});
 	}
 
-	// People sometimes throw things besides Error objects
 	if (typeof value === 'function') {
-		// `JSON.stringify()` discards functions. We do too, unless a function is thrown directly.
 		return `[Function: ${(value.name || 'anonymous')}]`;
 	}
 
 	return value;
-};
+}
 
-module.exports.deserializeError = function deserialize (value,options) {
-    
+export function deserializeError(value: any, options?: {maxDepth?: number}): any {
 	const {maxDepth = Number.POSITIVE_INFINITY} = (options || {});
 
 	if (value instanceof Error) {
@@ -127,7 +130,7 @@ module.exports.deserializeError = function deserialize (value,options) {
 	}
 
 	if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-		const newError = new Error(); // eslint-disable-line unicorn/error-message
+		const newError = new Error();
 		destroyCircular({
 			from: value,
 			seen: [],
@@ -139,6 +142,4 @@ module.exports.deserializeError = function deserialize (value,options) {
     }
 
     return value;
-};
-
-})();
+}

@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.6] - 2026-11-20
+
+### Added
+- Full TypeScript support with strict type checking
+- TypeScript source files (`index.ts` and `lib/serialize-error.ts`)
+- Generated TypeScript declaration files for type information
+- `tsconfig.json` with optimized compiler settings for Node.js
+- Type definitions for dependencies (@types/node, @types/bson, @types/uniqid)
+
+### Changed
+- Converted source code from JavaScript to TypeScript
+- Updated build pipeline: esbuild now compiles `index.ts` instead of `index.js`
+- `index.js` is now a lightweight wrapper that re-exports `dist/p-ipc.js`
+- Added `"types": "index.ts"` to package.json for TypeScript support
+- Refactored class-based implementation with proper TypeScript interfaces
+
+### Developer Experience
+- Full IDE intellisense and type checking for TypeScript developers
+- Type stubs for node-ipc dependency
+- Improved type safety while maintaining CommonJS output
+- All 24 tests passing with TypeScript source
+
+### Backward Compatibility
+- CommonJS output format unchanged
+- Distribution bundle format maintained (minified)
+- Zero breaking changes to public API
+- Existing CommonJS consumers work unchanged
+
 ## [2.1.5] - 2026-11-20
 
 ### Added

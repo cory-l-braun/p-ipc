@@ -1,8 +1,9 @@
 {
   "name": "p-ipc",
-  "version": "2.1.5",
+  "version": "2.1.6",
   "description": "Promise based IPC",
   "main": "index.js",
+  "types": "index.ts",
   "scripts": {
     "build": "node esbuild.config.js",
     "test": "mocha --exit",
@@ -24,8 +25,12 @@
     "uniqid": "^5.2.0"
   },
   "devDependencies": {
+    "@types/bson": "^4.0.5",
+    "@types/node": "^26.6.6",
+    "@types/uniqid": "^5.3.4",
     "esbuild": "^0.28.2",
     "mocha": "^10.2.0",
-    "terser": "^5.51.3"
+    "terser": "^5.51.3",
+    "typescript": "^7.0.2"
   }
 }
