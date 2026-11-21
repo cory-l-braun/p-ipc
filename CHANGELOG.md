@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.7] - 2026-11-20
+
+### Changed
+- Updated `serialize-error` from embedded version to npm package (^13.1.0)
+  - Removed `lib/serialize-error.ts` - now fetched from npm
+  - Cleaner dependency management and easier maintenance
+- Upgraded production dependencies:
+  - `bson`: 4.3.0 → 7.3.4
+  - `node-ipc`: 9.1.3 → 14.0.0
+- Upgraded dev dependencies:
+  - `mocha`: 10.2.0 → 12.0.3
+  - `terser`: 5.51.3 → 5.51.4
+
+### Verified
+- All 24 tests passing with updated dependencies
+- Full backward compatibility maintained
+- No breaking changes to public API
+
 ## [2.1.6] - 2026-11-20
 
 ### Added

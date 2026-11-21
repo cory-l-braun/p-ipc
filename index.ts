@@ -1,7 +1,7 @@
 import ipc from 'node-ipc';
 import uniqid from 'uniqid';
 import { EJSON } from 'bson';
-import { serializeError, deserializeError } from './lib/serialize-error.js';
+import { serializeError, deserializeError } from 'serialize-error';
 
 interface IPCConfig {
 	[key: string]: any;
